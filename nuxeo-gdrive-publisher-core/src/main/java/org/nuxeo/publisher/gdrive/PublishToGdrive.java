@@ -14,8 +14,11 @@ import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.NuxeoException;
+import org.nuxeo.ecm.core.blob.BlobManager;
 import org.nuxeo.ecm.liveconnect.core.CredentialFactory;
+import org.nuxeo.ecm.liveconnect.core.LiveConnectFileInfo;
 import org.nuxeo.ecm.liveconnect.core.OAuth2CredentialFactory;
+import org.nuxeo.ecm.liveconnect.google.drive.GoogleDriveBlobProvider;
 import org.nuxeo.ecm.liveconnect.google.drive.GoogleOAuth2ServiceProvider;
 import org.nuxeo.ecm.platform.oauth2.providers.OAuth2ServiceProviderRegistry;
 import org.nuxeo.runtime.api.Framework;
@@ -34,7 +37,7 @@ public class PublishToGdrive {
     protected CoreSession session;
 
     @OperationMethod
-    public DocumentModel run(DocumentModel doc) {
+    public Blob run(DocumentModel doc) {
 
         String user = session.getPrincipal().getName();
 
@@ -76,10 +79,15 @@ public class PublishToGdrive {
         try {
             InputStreamContent inputStreamContent = new InputStreamContent(blob.getMimeType(),blob.getStream());
             File file = drive.files().insert(body,inputStreamContent).execute();
+
+            GoogleDriveBlobProvider blobProvider =
+                    (GoogleDriveBlobProvider) Framework.getService(BlobManager.class)
+                    .getBlobProvider("googledrive");
+
+            return blobProvider.toBlob(new LiveConnectFileInfo(gdriveUser,file.getId()));
+
         } catch (IOException e) {
             throw new NuxeoException("Couldn't publish to Gdrive",e);
         }
-
-        return doc;
     }
 }
