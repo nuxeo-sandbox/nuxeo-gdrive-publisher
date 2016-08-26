@@ -1,0 +1,9 @@
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Manifest-Version: 1.0
+Bundle-Vendor: org.nuxeo.publisher.gdrive
+Bundle-Version: 1.0.0
+Bundle-Name: nuxeo-gdrive-publisher-core
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.nuxeo.publisher.gdrive.nuxeo-gdrive-publisher-core;singleton=true
+Nuxeo-Component: OSGI-INF/publish-to-gdrive-operation-contrib.xml

@@ -1,0 +1,14 @@
+{
+  "generator-nuxeo": {
+    "lastRemote": {
+      "cachePath": "C:\\Users\\Michaël\\.cache\\yeoman\\nuxeo\\generator-nuxeo-meta\\stable"
+    },
+    "promptValues": {
+      "parent_package": "org.nuxeo.publisher.gdrive",
+      "parent_artifact": "nuxeo-gdrive-publisher-parent",
+      "nuxeo_version": "8.3",
+      "package": "org.nuxeo.publisher.gdrive"
+    },
+    "multi": true
+  }
+}
