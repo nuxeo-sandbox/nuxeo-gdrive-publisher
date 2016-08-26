@@ -10,9 +10,10 @@ import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Context;
 import org.nuxeo.ecm.automation.core.annotations.Operation;
 import org.nuxeo.ecm.automation.core.annotations.OperationMethod;
+import org.nuxeo.ecm.automation.core.annotations.Param;
+import org.nuxeo.ecm.automation.core.collectors.BlobCollector;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
-import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.blob.BlobManager;
 import org.nuxeo.ecm.liveconnect.core.CredentialFactory;
@@ -25,25 +26,30 @@ import org.nuxeo.runtime.api.Framework;
 
 import java.io.IOException;
 
-/**
- *
- */
-@Operation(id=PublishToGdrive.ID, category=Constants.CAT_DOCUMENT, label="PublishToGdrive", description="Describe here what your operation does.")
+
+@Operation(
+        id=PublishToGdrive.ID,
+        category=Constants.CAT_BLOB,
+        label="PublishToGdrive",
+        description="This operation uploads the input blob to gdrive and returns the corresponding liveconnect blob")
 public class PublishToGdrive {
 
-    public static final String ID = "Document.PublishToGdrive";
+    public static final String ID = "Blob.PublishToGdrive";
 
     @Context
     protected CoreSession session;
 
-    @OperationMethod
-    public Blob run(DocumentModel doc) {
+    @Param(name = "providerName", required=false)
+    protected String providerName = "googledrive";
+
+    @OperationMethod(collector = BlobCollector.class)
+    public Blob run(Blob blob) {
 
         String user = session.getPrincipal().getName();
 
         GoogleOAuth2ServiceProvider oAuth2provider =
                 (GoogleOAuth2ServiceProvider) Framework.getLocalService(OAuth2ServiceProviderRegistry.class)
-                .getProvider("googledrive");
+                .getProvider(providerName);
 
         String gdriveUser = oAuth2provider.getServiceUser(user);
 
@@ -70,8 +76,6 @@ public class PublishToGdrive {
                 .setApplicationName("Nuxeo/0") // set application name to avoid a WARN
                 .build();
 
-        Blob blob = (Blob) doc.getPropertyValue("file:content");
-
         File body = new File();
         body.setTitle(blob.getFilename());
         body.setMimeType(blob.getMimeType());
@@ -82,7 +86,7 @@ public class PublishToGdrive {
 
             GoogleDriveBlobProvider blobProvider =
                     (GoogleDriveBlobProvider) Framework.getService(BlobManager.class)
-                    .getBlobProvider("googledrive");
+                    .getBlobProvider(providerName);
 
             return blobProvider.toBlob(new LiveConnectFileInfo(gdriveUser,file.getId()));
 
